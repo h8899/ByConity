@@ -12,7 +12,7 @@ namespace
     class FunctionHelloWorld : public IFunction
     {
     public:
-        static constexpr auto name = "helloWorldHieu";
+        static constexpr auto name = "helloWorldWithStringColumn";
 
         static FunctionPtr create(ContextPtr)
         {
@@ -30,33 +30,55 @@ namespace
 
         DataTypePtr getReturnTypeImpl(const DataTypes & arguments) const override
         {
-            auto bool_type = DataTypeFactory::instance().get("Bool");
-            return arguments[0]->isNullable() ? makeNullable(bool_type) : bool_type;
+            auto string_type = DataTypeFactory::instance().get("String");
+            return arguments[0]->isNullable() ? makeNullable(string_type) : string_type;
         }
 
-        ColumnPtr executeImpl(const ColumnsWithTypeAndName & arguments, const DataTypePtr & result_type, size_t) const override
-        {
-            ColumnsWithTypeAndName cast_args
+        ColumnPtr executeImpl(const ColumnsWithTypeAndName & arguments, const DataTypePtr & result_type, size_t input_rows_count) const override
+        {  
+            if (const ColumnString * col_from = checkAndGetColumn<ColumnString>(arguments[0].column.get()))
             {
-                arguments[0],
-                {
-                    DataTypeString().createColumnConst(arguments[0].column->size(), arguments[0].type->isNullable() ? "Nullable(Bool)" : "Bool"),
-                    std::make_shared<DataTypeString>(),
-                    ""
-                }
-            };
+                const typename ColumnString::Chars & source_data = col_from->getChars();
 
-            FunctionOverloadResolverPtr func_builder_cast = CastOverloadResolver<CastType::nonAccurate>::createImpl(false);
-            auto func_cast = func_builder_cast->build(cast_args);
-            return func_cast->execute(cast_args, result_type, arguments[0].column->size());
+                const char* prefix_str = "helloWorld";
+                // size_t target_chars_size = sizeof(prefix_str) + source_data.size();
+                
+                // auto offsets_col = ColumnString::ColumnOffsets::create();
+                // auto & offsets_data = offsets_col->getData();
+                // offsets_data.resize(input_rows_count);
+
+                auto data_col = ColumnString::create();
+                // auto & res_data = data_col->getChars();
+                // res_data.resize(target_chars_size);
+
+                // memcpy(&res_data[0], prefix_str, sizeof(prefix_str));
+                // memcpy(&res_data[sizeof(prefix_str)-1], &source_data[0], source_data.size());
+
+                // ColumnString::Offset current_offset = 0;
+                for (size_t i = 0; i < input_rows_count; ++i) {
+                    StringRef current_row = col_from->getDataAt(i);
+                    auto current_row_data = current_row.toString();
+                    // Concatenate the strings
+                    std::string concatenated = prefix_str + current_row_data;
+                    // Convert the resulting std::string to a char*
+                    char* concatenatedCharPtr = new char[concatenated.size() + 1];
+                    std::strcpy(concatenatedCharPtr, concatenated.c_str());
+                    data_col->insertData(concatenatedCharPtr, sizeof(concatenatedCharPtr) + sizeof(prefix_str));
+                }
+                
+                return data_col;
+            }
+            else
+                throw Exception("Illegal column " + arguments[0].column->getName() + " of first argument of function " + getName(),
+                ErrorCodes::ILLEGAL_COLUMN);
         }
     };
 
 }
 
-REGISTER_FUNCTION(ToBool)
+REGISTER_FUNCTION(HelloWorld)
 {
-    factory.registerFunction<FunctionToBool>();
+    factory.registerFunction<FunctionHelloWorld>();
 }
 
 }

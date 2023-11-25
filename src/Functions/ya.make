@@ -537,6 +537,7 @@ SRCS(
     toYear.cpp
     today.cpp
     today2.cpp
+    helloWorld.cpp
     transform.cpp
     trap.cpp
     trim.cpp
