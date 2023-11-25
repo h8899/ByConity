@@ -12,12 +12,12 @@
     <WORKER_ID></WORKER_ID>
     <WORKER_GROUP_ID>vw_default_A</WORKER_GROUP_ID>
     <VIRTUAL_WAREHOUSE_ID>vw_default</VIRTUAL_WAREHOUSE_ID>
-    <http_port>8123</http_port>
-    <rpc_port>8124</rpc_port>
-    <tcp_port>9010</tcp_port>
-    <ha_tcp_port>9800</ha_tcp_port>
-    <exchange_port>9300</exchange_port>
-    <exchange_status_port>9400</exchange_status_port>
+    <http_port>8133</http_port>
+    <rpc_port>8134</rpc_port>
+    <tcp_port>9020</tcp_port>
+    <ha_tcp_port>9810</ha_tcp_port>
+    <exchange_port>9310</exchange_port>
+    <exchange_status_port>9410</exchange_status_port>
 
     <vw_name>vw_default</vw_name>
 
@@ -49,7 +49,7 @@
         </client>
     </openSSL>
 
-    <interserver_http_port>30977</interserver_http_port>
+    <interserver_http_port>30987</interserver_http_port>
 
     <listen_host>::</listen_host>
 
@@ -64,11 +64,11 @@
 
     <mark_cache_size>5368709120</mark_cache_size>
 
-    <path>/var/lib/byconity-server/</path>
+    <path>/var/lib/byconity-worker/</path>
 
-    <tmp_path>/var/lib/byconity-server/tmp_data/</tmp_path>
+    <tmp_path>/var/lib/byconity-worker/tmp_data/</tmp_path>
 
-    <user_files_path>/var/lib/byconity-server/user_files/</user_files_path>
+    <user_files_path>/var/lib/byconity-worker/user_files/</user_files_path>
 
     <users_config>/etc/byconity-server/users.xml</users_config>
 
@@ -127,7 +127,7 @@
         </default>
     </graphite_rollup_example>
 
-    <format_schema_path>/var/lib/byconity-server/format_schemas/</format_schema_path>
+    <format_schema_path>/var/lib/byconity-worker/format_schemas/</format_schema_path>
 
     <cnch_type>worker</cnch_type>
 
@@ -139,7 +139,7 @@
         <disks>
             <default></default>
             <server_local_disk1>
-                <path>/var/lib/byconity-server/server_local_disk/data/0/</path>
+                <path>/var/lib/byconity-worker/server_local_disk/data/0/</path>
             </server_local_disk1>
             <server_hdfs_disk0>
                 <path>/user/clickhouse/</path>
