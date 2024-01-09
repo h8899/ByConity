@@ -11,7 +11,7 @@
             <headless_service>cnch-server-headless</headless_service>
 
             <node>
-                <host>{your_server_address}</host>
+                <host>127.0.0.1</host>
                 <hostname>Server-6</hostname>
                 <ports>
                     <port>
@@ -49,7 +49,7 @@
             <headless_service>cnch-tso-headless</headless_service>
 
             <node>
-                <host>{your_tso_address}</host>
+                <host>127.0.0.1</host>
                 <hostname>TSO-0</hostname>
                 <ports>
                     <port>
@@ -66,7 +66,7 @@
             <headless_service>cnch-daemonmanager-headless</headless_service>
 
             <node>
-                <host>{your_daemonmanager_address}</host>
+                <host>127.0.0.1</host>
                 <hostname>Daemon-1</hostname>
                 <ports>
                     <port>
@@ -83,7 +83,7 @@
             <headless_service>cnch-resourcemanager-headless</headless_service>
             <!-- For local test -->
             <node>
-                <host>{your_resource_manager_address}</host>
+                <host>127.0.0.1</host>
                 <hostname>rm0</hostname>
                 <ports>
                     <!-- RPC/Primary -->
@@ -98,7 +98,7 @@
     </service_discovery_kv>
 
     <catalog>
-        <name_space>catalog_namespace_uniq_string</name_space>
+        <name_space>fdb_hl_ns1</name_space>
     </catalog>
 
     <catalog_service>
@@ -108,5 +108,5 @@
         </fdb>
     </catalog_service>
 
-    <hdfs_nnproxy>hdfs://localhost:12001</hdfs_nnproxy>
+    <hdfs_nnproxy>hdfs://127.0.0.1:9000</hdfs_nnproxy>
 </yandex>

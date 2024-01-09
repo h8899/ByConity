@@ -1,0 +1,115 @@
+/*
+ * Copyright 2016-2023 ClickHouse, Inc.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/*
+ * This file may have been modified by Bytedance Ltd. and/or its affiliates (“ Bytedance's Modifications”).
+ * All Bytedance's Modifications are Copyright (2023) Bytedance Ltd. and/or its affiliates.
+ */
+
+#include <common/DateLUT.h>
+
+#include <Core/Field.h>
+
+#include <DataTypes/DataTypeDate.h>
+
+#include <Functions/IFunction.h>
+#include <Functions/FunctionFactory.h>
+
+
+namespace DB
+{
+namespace
+{
+
+class ExecutableFunctionToday2 : public IExecutableFunction
+{
+public:
+    // Only called by FunctionBaseToday2 which passes UInt16
+    // coverity[store_truncates_time_t]
+    explicit ExecutableFunctionToday2(time_t time_) : day_value(time_) {}
+
+    String getName() const override { return "today2"; }
+
+    ColumnPtr executeImpl(const ColumnsWithTypeAndName &, const DataTypePtr &, size_t input_rows_count) const override
+    {
+        return DataTypeDate().createColumnConst(input_rows_count, day_value);
+    }
+
+private:
+    DayNum day_value;
+};
+
+class FunctionBaseToday2 : public IFunctionBase
+{
+public:
+    explicit FunctionBaseToday2(DayNum day_value_) : day_value(day_value_), return_type(std::make_shared<DataTypeDate>()) {}
+
+    String getName() const override { return "today2"; }
+
+    const DataTypes & getArgumentTypes() const override
+    {
+        static const DataTypes argument_types;
+        return argument_types;
+    }
+
+    const DataTypePtr & getResultType() const override
+    {
+        return return_type;
+    }
+
+    ExecutableFunctionPtr prepare(const ColumnsWithTypeAndName &) const override
+    {
+        return std::make_unique<ExecutableFunctionToday2>(day_value);
+    }
+
+    bool isDeterministic() const override { return false; }
+    bool isDeterministicInScopeOfQuery() const override { return true; }
+
+private:
+    DayNum day_value;
+    DataTypePtr return_type;
+};
+
+class Today2OverloadResolver : public IFunctionOverloadResolver
+{
+public:
+    static constexpr auto name = "today2";
+
+    String getName() const override { return name; }
+
+    bool isDeterministic() const override { return false; }
+
+    size_t getNumberOfArguments() const override { return 0; }
+
+    static FunctionOverloadResolverPtr create(ContextPtr) { return std::make_unique<Today2OverloadResolver>(); }
+
+    DataTypePtr getReturnTypeImpl(const DataTypes &) const override { return std::make_shared<DataTypeDate>(); }
+
+    FunctionBasePtr buildImpl(const ColumnsWithTypeAndName &, const DataTypePtr &) const override
+    {
+        return std::make_unique<FunctionBaseToday2>(DayNum(DateLUT::instance().toDayNum(time(nullptr)).toUnderType()));
+    }
+};
+
+}
+
+REGISTER_FUNCTION(Today2)
+{
+    factory.registerFunction<Today2OverloadResolver>();
+    factory.registerAlias("CURRENT_DATE_3", Today2OverloadResolver::name, FunctionFactory::CaseInsensitive);
+}
+
+}
